@@ -1,3 +1,5 @@
+#!/bin/bash
+
 const sdl = require('../index');
 
 const width = 720,
@@ -9,16 +11,17 @@ sdl.setRenderDrawColour(0, 0, 0, 0);
 sdl.renderClear();
 sdl.renderPresent();
 
+const Rasa = sdl.loadFont("/home/jcake/Code/Project/Lotus/lib/native/sdl2/fonts/Rasa-Light.ttf", 24);
+
 const draw = function () {
-    sdl.setRenderDrawColour(0, 0, 0, 0);
+    sdl.setRenderDrawColour(0, 0, 0, 0xff);
     sdl.renderClear();
 
     sdl.setRenderDrawColour(0xff, 0xff, 0xff, 0xff);
 
     sdl.pollEvent();
-
-    for (let i = 0; i < width; i++)
-        sdl.renderDrawPoint(i, height / 2);
+    
+    sdl.drawText(0, 0, "Hello World");
 
     sdl.renderPresent();
 

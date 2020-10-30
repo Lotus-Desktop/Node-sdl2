@@ -4,6 +4,11 @@
 #include <SDL.h>
 
 #include "main.h"
+#include "util.h"
+#include "extras.h"
+
+#define SDL_STB_FONT_IMPL
+#include "text/sdlStbFont.h"
 
 Napi::Number sdl2::init(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
@@ -31,7 +36,7 @@ Napi::Number sdl2::createWindowAndRenderer(const Napi::CallbackInfo &info) {
     Napi::Number returnValue = Napi::Number::New(env, SDL_CreateWindowAndRenderer(
                                                           width.Int64Value(),
                                                           height.Int64Value(),
-                                                          flags.Uint32Value(),
+                                                          flags.Uint32Value() | SDL_WINDOW_RESIZABLE,
                                                           &sdl2::window, &sdl2::renderer));
 
     return returnValue;
@@ -96,6 +101,55 @@ Napi::Number sdl2::renderDrawPoint(const Napi::CallbackInfo &info) {
     return returnValue;
 }
 
+void sdl2::renderDrawRect(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+
+    if ((info.Length() != 4 && info.Length() != 5) || !info[0].IsNumber() || !info[1].IsNumber() || !info[2].IsNumber() || !info[3].IsNumber())
+        Napi::TypeError::New(env, "Expected Number").ThrowAsJavaScriptException();
+
+    Napi::Number x = info[0].As<Napi::Number>();
+    Napi::Number y = info[1].As<Napi::Number>();
+    Napi::Number w = info[2].As<Napi::Number>();
+    Napi::Number h = info[3].As<Napi::Number>();
+    
+    Napi::Number r = Napi::Number::New(env, 1);
+    if (info.Length() == 5)
+        r = info[4].As<Napi::Number>();
+    
+    for (int i = 0; i < r.Int64Value(); i++) {
+        SDL_Rect rect;
+        
+        rect.x = x.Int64Value() + i;
+        rect.y = y.Int64Value() + i;
+        rect.w = w.Int64Value() - i * 2;
+        rect.h = h.Int64Value() - i * 2;
+            
+        SDL_RenderDrawRect(sdl2::renderer, &rect);
+    }
+}
+
+void sdl2::renderFillRect(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    if (info.Length() != 4 || !info[0].IsNumber() || !info[1].IsNumber() || !info[2].IsNumber() || !info[3].IsNumber())
+        Napi::TypeError::New(env, "Expected Number").ThrowAsJavaScriptException();
+
+    Napi::Number x = info[0].As<Napi::Number>();
+    Napi::Number y = info[1].As<Napi::Number>();
+    Napi::Number w = info[2].As<Napi::Number>();
+    Napi::Number h = info[3].As<Napi::Number>();
+    
+    SDL_Rect rect;
+        
+    rect.x = x.Int64Value();
+    rect.y = y.Int64Value();
+    rect.w = w.Int64Value();
+    rect.h = h.Int64Value();
+    
+    SDL_RenderFillRect(sdl2::renderer, &rect);
+}
+
+
 void sdl2::delay(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
 
@@ -108,14 +162,14 @@ void sdl2::delay(const Napi::CallbackInfo &info) {
 }
 
 Napi::Number sdl2::pollEvent(const Napi::CallbackInfo &info) {
-    Napi::Env env = info.Env();
+    Napi::Env env = info.Env(); 
 
     Napi::Number returnValue = Napi::Number::New(env, SDL_PollEvent(&sdl2::event));
 
     return returnValue;
 }
 
-Napi::Object getEvent(const Napi::CallbackInfo &info) {
+Napi::Object extras::getEvent(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     Napi::Object eventObj = Napi::Object::New(env);
 
@@ -124,7 +178,37 @@ Napi::Object getEvent(const Napi::CallbackInfo &info) {
     return eventObj;
 }
 
+void extras::loadFont(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    
+    if (info.Length() != 2 || !info[0].IsString() || !info[1].IsNumber())
+        Napi::TypeError::New(env, "Expected String, Number").ThrowAsJavaScriptException();
+    
+    Napi::String fontFile = info[0].As<Napi::String>();
+    Napi::Number faceSize = info[1].As<Napi::Number>();
+    
+    sdl_stb_memory rasaLight;
+    util::readFileRaw_toMemory(fontFile.Utf8Value(), rasaLight);
+    sdl2::fc.faceSize = faceSize.Int64Value();
+    sdl2::fc.loadFontManaged(rasaLight);
+    sdl2::fc.bindRenderer(sdl2::renderer);
+}
+
+void extras::drawText(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+
+    if (info.Length() != 3 || !info[0].IsNumber() || !info[1].IsNumber() || !info[2].IsString())
+        Napi::TypeError::New(env, "Expected Number, Number, String").ThrowAsJavaScriptException();
+
+    Napi::Number x = info[0].As<Napi::Number>();
+    Napi::Number y = info[1].As<Napi::Number>();
+    Napi::String string = info[2].As<Napi::String>();
+    
+    sdl2::fc.drawText(x.Int64Value(), y.Int64Value(), string.Utf8Value());
+}
+
 Napi::Object sdl2::Init(Napi::Env env, Napi::Object exports) {
+
     exports.Set("init", Napi::Function::New(env, sdl2::init));
     exports.Set("createWindowAndRenderer", Napi::Function::New(env, sdl2::createWindowAndRenderer));
     exports.Set("setRenderDrawColour", Napi::Function::New(env, sdl2::setRenderDrawColour));
@@ -134,10 +218,15 @@ Napi::Object sdl2::Init(Napi::Env env, Napi::Object exports) {
     exports.Set("destroyWindow", Napi::Function::New(env, sdl2::destroyWindow));
     exports.Set("quit", Napi::Function::New(env, sdl2::quit));
     exports.Set("renderDrawPoint", Napi::Function::New(env, sdl2::renderDrawPoint));
+    exports.Set("renderDrawRect", Napi::Function::New(env, sdl2::renderDrawRect));
+    exports.Set("renderFillRect", Napi::Function::New(env, sdl2::renderFillRect));
     exports.Set("delay", Napi::Function::New(env, sdl2::delay));
     exports.Set("pollEvent", Napi::Function::New(env, sdl2::pollEvent));
 
-    exports.Set("getEvent", Napi::Function::New(env, getEvent));
+    exports.Set("getEvent", Napi::Function::New(env, extras::getEvent));
+    
+    exports.Set("loadFont", Napi::Function::New(env, extras::loadFont));
+    exports.Set("drawText", Napi::Function::New(env, extras::drawText));
 
     Napi::Object events = Napi::Object::New(env);
     events.Set("Quit", Napi::Number::New(env, SDL_QUIT));

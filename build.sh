@@ -1,1 +1,2 @@
-pnpx cmake-js ; node ./test/circle.js
+node test/shapes.js
+node test/text.js

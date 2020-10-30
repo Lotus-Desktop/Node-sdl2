@@ -1,13 +1,17 @@
 #pragma once
 
-#include <SDL.h>
 #include <napi.h>
+#include <SDL.h>
 #include <iostream>
+
+#include "text/sdlStbFont.h"
 
 namespace sdl2 {
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Event event;
+
+    sdl_stb_font_cache fc;
     
     Napi::Number init(const Napi::CallbackInfo &info);
     Napi::Number createWindowAndRenderer(const Napi::CallbackInfo &info);
@@ -18,6 +22,8 @@ namespace sdl2 {
     void destroyWindow(const Napi::CallbackInfo &info);
     void quit(const Napi::CallbackInfo &info);
     Napi::Number renderDrawPoint(const Napi::CallbackInfo &info);
+    void renderDrawRect(const Napi::CallbackInfo &info);
+    void renderFillRect(const Napi::CallbackInfo &info);
     void delay(const Napi::CallbackInfo &info);
     Napi::Number pollEvent(const Napi::CallbackInfo &info);
 
