@@ -69,6 +69,10 @@ export function pollEvent(): number;
 
 export function getEvent(): Event;
 
-export function drawText(x: number, y: number, string: string): void;
+export function loadFont(fontFile: string): number;
 
-// export function setFont(size: number, style: number, fontFile: string): void;
+export function setFont(fontId: number, fontSize: number): void;
+
+export function setFontColour(r: number, g: number, b: number, a: number): void;
+
+export function drawText(x: number, y: number, string: string): void;

@@ -13,19 +13,19 @@ namespace sdl2 {
 
     sdl_stb_font_cache fc;
     
-    Napi::Number init(const Napi::CallbackInfo &info);
-    Napi::Number createWindowAndRenderer(const Napi::CallbackInfo &info);
-    Napi::Number setRenderDrawColour(const Napi::CallbackInfo &info);
-    Napi::Number renderClear(const Napi::CallbackInfo &info);
+    void init(const Napi::CallbackInfo &info);
+    void createWindowAndRenderer(const Napi::CallbackInfo &info);
+    void setRenderDrawColour(const Napi::CallbackInfo &info);
+    void renderClear(const Napi::CallbackInfo &info);
     void renderPresent(const Napi::CallbackInfo &info);
     void destroyRenderer(const Napi::CallbackInfo &info);
     void destroyWindow(const Napi::CallbackInfo &info);
     void quit(const Napi::CallbackInfo &info);
-    Napi::Number renderDrawPoint(const Napi::CallbackInfo &info);
+    void renderDrawPoint(const Napi::CallbackInfo &info);
     void renderDrawRect(const Napi::CallbackInfo &info);
     void renderFillRect(const Napi::CallbackInfo &info);
     void delay(const Napi::CallbackInfo &info);
-    Napi::Number pollEvent(const Napi::CallbackInfo &info);
+    void pollEvent(const Napi::CallbackInfo &info);
 
     Napi::Object Init(Napi::Env env, Napi::Object exports);
     NODE_API_MODULE(addon, Init)

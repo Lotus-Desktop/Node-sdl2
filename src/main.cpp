@@ -10,7 +10,7 @@
 #define SDL_STB_FONT_IMPL
 #include "text/sdlStbFont.h"
 
-Napi::Number sdl2::init(const Napi::CallbackInfo &info) {
+void sdl2::init(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
 
     if (info.Length() != 1 || !info[0].IsNumber())
@@ -18,12 +18,10 @@ Napi::Number sdl2::init(const Napi::CallbackInfo &info) {
 
     Napi::Number flags = info[0].As<Napi::Number>();
 
-    Napi::Number returnValue = Napi::Number::New(env, SDL_Init(flags.Uint32Value()));
-
-    return returnValue;
+    SDL_Init(flags.Uint32Value());
 }
 
-Napi::Number sdl2::createWindowAndRenderer(const Napi::CallbackInfo &info) {
+void sdl2::createWindowAndRenderer(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
 
     if (info.Length() != 3 || !info[0].IsNumber() || !info[1].IsNumber() || !info[2].IsNumber())
@@ -33,16 +31,10 @@ Napi::Number sdl2::createWindowAndRenderer(const Napi::CallbackInfo &info) {
     Napi::Number height = info[1].As<Napi::Number>();
     Napi::Number flags = info[2].As<Napi::Number>();
 
-    Napi::Number returnValue = Napi::Number::New(env, SDL_CreateWindowAndRenderer(
-                                                          width.Int64Value(),
-                                                          height.Int64Value(),
-                                                          flags.Uint32Value() | SDL_WINDOW_RESIZABLE,
-                                                          &sdl2::window, &sdl2::renderer));
-
-    return returnValue;
+    SDL_CreateWindowAndRenderer(width.Int64Value(), height.Int64Value(), flags.Uint32Value() | SDL_WINDOW_RESIZABLE, &sdl2::window, &sdl2::renderer);
 }
 
-Napi::Number sdl2::setRenderDrawColour(const Napi::CallbackInfo &info) {
+void sdl2::setRenderDrawColour(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
 
     if (info.Length() != 4 || !info[0].IsNumber() || !info[1].IsNumber() || !info[2].IsNumber() || !info[2].IsNumber())
@@ -53,22 +45,11 @@ Napi::Number sdl2::setRenderDrawColour(const Napi::CallbackInfo &info) {
     Napi::Number b = info[2].As<Napi::Number>();
     Napi::Number a = info[3].As<Napi::Number>();
 
-    Napi::Number returnValue = Napi::Number::New(env, SDL_SetRenderDrawColor(
-                                                          sdl2::renderer,
-                                                          (Uint8)r.Uint32Value(),
-                                                          (Uint8)g.Uint32Value(),
-                                                          (Uint8)b.Uint32Value(),
-                                                          (Uint8)a.Uint32Value()));
-
-    return returnValue;
+    SDL_SetRenderDrawColor(sdl2::renderer, (Uint8)r.Uint32Value(), (Uint8)g.Uint32Value(), (Uint8)b.Uint32Value(), (Uint8)a.Uint32Value());
 }
 
-Napi::Number sdl2::renderClear(const Napi::CallbackInfo &info) {
-    Napi::Env env = info.Env();
-
-    Napi::Number returnValue = Napi::Number::New(env, SDL_RenderClear(sdl2::renderer));
-
-    return returnValue;
+void sdl2::renderClear(const Napi::CallbackInfo &info) {
+    SDL_RenderClear(sdl2::renderer);
 }
 
 void sdl2::renderPresent(const Napi::CallbackInfo &info) {
@@ -87,7 +68,7 @@ void sdl2::quit(const Napi::CallbackInfo &info) {
     SDL_Quit();
 }
 
-Napi::Number sdl2::renderDrawPoint(const Napi::CallbackInfo &info) {
+void sdl2::renderDrawPoint(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
 
     if (info.Length() != 2 || !info[0].IsNumber() || !info[1].IsNumber())
@@ -96,9 +77,7 @@ Napi::Number sdl2::renderDrawPoint(const Napi::CallbackInfo &info) {
     Napi::Number x = info[0].As<Napi::Number>();
     Napi::Number y = info[1].As<Napi::Number>();
 
-    Napi::Number returnValue = Napi::Number::New(env, SDL_RenderDrawPoint(sdl2::renderer, x.Int64Value(), y.Int64Value()));
-
-    return returnValue;
+    SDL_RenderDrawPoint(sdl2::renderer, x.Int64Value(), y.Int64Value());
 }
 
 void sdl2::renderDrawRect(const Napi::CallbackInfo &info) {
@@ -161,12 +140,8 @@ void sdl2::delay(const Napi::CallbackInfo &info) {
     SDL_Delay(ms.Uint32Value());
 }
 
-Napi::Number sdl2::pollEvent(const Napi::CallbackInfo &info) {
-    Napi::Env env = info.Env(); 
-
-    Napi::Number returnValue = Napi::Number::New(env, SDL_PollEvent(&sdl2::event));
-
-    return returnValue;
+void sdl2::pollEvent(const Napi::CallbackInfo &info) {
+    SDL_PollEvent(&sdl2::event);
 }
 
 Napi::Object extras::getEvent(const Napi::CallbackInfo &info) {
@@ -178,20 +153,59 @@ Napi::Object extras::getEvent(const Napi::CallbackInfo &info) {
     return eventObj;
 }
 
-void extras::loadFont(const Napi::CallbackInfo &info) {
+Napi::Number extras::loadFont(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     
-    if (info.Length() != 2 || !info[0].IsString() || !info[1].IsNumber())
-        Napi::TypeError::New(env, "Expected String, Number").ThrowAsJavaScriptException();
+    if (info.Length() != 1 || !info[0].IsString())
+        Napi::TypeError::New(env, "Expected String").ThrowAsJavaScriptException();
     
     Napi::String fontFile = info[0].As<Napi::String>();
-    Napi::Number faceSize = info[1].As<Napi::Number>();
     
-    sdl_stb_memory rasaLight;
-    util::readFileRaw_toMemory(fontFile.Utf8Value(), rasaLight);
-    sdl2::fc.faceSize = faceSize.Int64Value();
-    sdl2::fc.loadFontManaged(rasaLight);
+    sdl_stb_memory font;
+    util::readFileRaw_toMemory(fontFile.Utf8Value(), font);
+    sdl2::fc.loadFontManaged(font);
     sdl2::fc.bindRenderer(sdl2::renderer);
+    
+    std::cout << "Pushing New Font - New List Size: " << extras::fonts.size() << std::endl;
+    extras::fonts.push_back(font);
+    
+    Napi::Number fontId = Napi::Number::New(env, extras::fonts.size() - 1);
+    
+    return fontId;
+}
+
+void extras::setTextColour(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    
+    if (info.Length() != 4 || !info[0].IsNumber() || !info[1].IsNumber() || !info[2].IsNumber() || !info[3].IsNumber())
+        Napi::TypeError::New(env, "Expected Number, Number, Number, Number").ThrowAsJavaScriptException();
+    
+    Napi::Number r = info[0].As<Napi::Number>();
+    Napi::Number g = info[1].As<Napi::Number>();
+    Napi::Number b = info[2].As<Napi::Number>();
+    Napi::Number a = info[3].As<Napi::Number>();
+    
+    extras::textColour[0] = r;
+    extras::textColour[1] = g;
+    extras::textColour[2] = b;
+    extras::textColour[3] = a;
+}
+
+void extras::setFont(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    
+    if (info.Length() != 2 || !info[0].IsNumber() || !info[1].IsNumber())
+        Napi::TypeError::New(env, "Expected Number, Number").ThrowAsJavaScriptException();
+    
+    Napi::Number fontId = info[0].As<Napi::Number>();
+    Napi::Number fontSize = info[1].As<Napi::Number>();
+    
+    if (extras::fonts.size() <= fontId.Int64Value())
+        Napi::RangeError::New(env, "Unknown Font ID").ThrowAsJavaScriptException();
+    
+    sdl2::fc.clearGlyphs();
+    sdl2::fc.faceSize = fontSize.Int64Value();
+    sdl2::fc.loadFontManaged(extras::fonts[fontId.Int64Value()]);
 }
 
 void extras::drawText(const Napi::CallbackInfo &info) {
@@ -204,7 +218,10 @@ void extras::drawText(const Napi::CallbackInfo &info) {
     Napi::Number y = info[1].As<Napi::Number>();
     Napi::String string = info[2].As<Napi::String>();
     
-    sdl2::fc.drawText(x.Int64Value(), y.Int64Value(), string.Utf8Value());
+    sdl_stb_prerendered_text prt;
+    sdl2::fc.renderTextToObject(&prt, string.Utf8Value());
+    prt.drawWithColorMod(sdl2::renderer, x.Int64Value(), y.Int64Value(), extras::textColour[0], extras::textColour[1], extras::textColour[2], extras::textColour[3]);
+    prt.freeTexture();
 }
 
 Napi::Object sdl2::Init(Napi::Env env, Napi::Object exports) {
@@ -225,8 +242,15 @@ Napi::Object sdl2::Init(Napi::Env env, Napi::Object exports) {
 
     exports.Set("getEvent", Napi::Function::New(env, extras::getEvent));
     
+    extras::textColour[0] = 0;
+    extras::textColour[1] = 0;
+    extras::textColour[2] = 0;
+    extras::textColour[3] = 0xff;
+    
     exports.Set("loadFont", Napi::Function::New(env, extras::loadFont));
     exports.Set("drawText", Napi::Function::New(env, extras::drawText));
+    exports.Set("setFont", Napi::Function::New(env, extras::setFont));
+    exports.Set("setTextColour", Napi::Function::New(env, extras::setTextColour));
 
     Napi::Object events = Napi::Object::New(env);
     events.Set("Quit", Napi::Number::New(env, SDL_QUIT));
