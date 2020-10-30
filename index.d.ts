@@ -73,6 +73,6 @@ export function loadFont(fontFile: string): number;
 
 export function setFont(fontId: number, fontSize: number): void;
 
-export function setFontColour(r: number, g: number, b: number, a: number): void;
+export function setTextColour(r: number, g: number, b: number, a: number): void;
 
 export function drawText(x: number, y: number, string: string): void;
