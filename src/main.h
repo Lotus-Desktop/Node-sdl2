@@ -3,6 +3,8 @@
 #include <napi.h>
 #include <SDL.h>
 #include <iostream>
+#include <unordered_map>
+#include <vector>
 
 #include "text/sdlStbFont.h"
 
@@ -10,6 +12,13 @@ namespace sdl2 {
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Event event;
+
+    Napi::Function mouseMove;
+    Napi::Function mouseDown;
+    Napi::Function mouseUp;
+    Napi::Function keyDown;
+    Napi::Function keyUp;
+    Napi::Function windowEvent;
 
     sdl_stb_font_cache fc;
     
@@ -28,5 +37,5 @@ namespace sdl2 {
     void pollEvent(const Napi::CallbackInfo &info);
 
     Napi::Object Init(Napi::Env env, Napi::Object exports);
-    NODE_API_MODULE(addon, Init)
+    NODE_API_MODULE(addon, Init);
 }

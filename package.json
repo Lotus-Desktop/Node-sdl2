@@ -5,6 +5,8 @@
 	},
 	"scripts": {
 		"install": "cmake-js compile",
+		"run": "node ~/Code/Project/Lotus/Launcher/build/launcher.js ~/Code/Project/Lotus/app/daisy-test/manifest.json",
+		"build": "cmake-js compile ; cd ./build ; make -j8",
 		"preinstall": "npm config set cmake_js_arch ia32"
 	}
 }

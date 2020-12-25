@@ -1,3 +1,5 @@
+export type eventName = "mouseMove" | "mouseDown" | "mouseUp" | "keyDown" | "keyUp" | "windowStateChange";
+
 export enum initFlags {
     Timer = 0x00000001,
     Audio = 0x00000010,
@@ -37,11 +39,20 @@ export enum windowFlags {
 
 export enum Events {
     Quit = 0x100,
+    WindowMove = 4,
+    WindowResize = 5,
+    WindowRestore = 9,
+    WindowMinimised = 7,
+    WindowMaximised = 8,
+    KeyDown = 768,
+    KeyUp = 769,
+    MouseDown = 1025,
+    MouseUp = 1026,
+    MouseWheel = 1027,
+    TouchDown = 1792,
+    TouchUp = 1793,
+    TouchMove = 1794
 }
-
-type Event = {
-    type: number
-};
 
 export function init(flags: number): number;
 
@@ -63,16 +74,24 @@ export function renderDrawPoint(x: number, y: number): number;
 
 export function renderDrawRect(x: number, y: number, w: number, h: number, r?: number): number;
 
+export function renderFillRect(x: number, y: number, w: number, h: number): number;
+
 export function delay(ms: number): void;
 
 export function pollEvent(): number;
 
-export function getEvent(): Event;
+export function getEvent(): number;
 
 export function loadFont(fontFile: string): number;
 
 export function setFont(fontId: number, fontSize: number): void;
 
-export function setFontColour(r: number, g: number, b: number, a: number): void;
+export function setTextColour(r: number, g: number, b: number, a: number): void;
 
 export function drawText(x: number, y: number, string: string): void;
+
+export function measureText(text: string, fontId?: number): {width: number, height: number};
+
+export function getMouse(): {x: number, y: number};
+
+export function on(event: eventName, callback: (data: any) => void): void;

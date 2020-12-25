@@ -11,32 +11,27 @@ sdl.setRenderDrawColour(0, 0, 0, 0);
 sdl.renderClear();
 sdl.renderPresent();
 
-const OpenSans = sdl.loadFont("/home/jcake/.fonts/open-sans/OpenSans-BoldItalic.ttf");
-sdl.setFont(OpenSans, 24);
+const OpenSans = sdl.loadFont("/home/jcake/.fonts/open-sans/OpenSans-Regular.ttf");
+sdl.setFont(OpenSans, 20);
 
 const draw = function () {
-    sdl.setRenderDrawColour(0xff, 0xff, 0xff, 0xff);
+    // sdl.setRenderDrawColour(0xff, 0xff, 0xff, 0xff);
+    sdl.setRenderDrawColour(0x00, 0x00, 0x00, 0x00);
     sdl.renderClear();
 
     sdl.setRenderDrawColour(0xff, 0xff, 0xff, 0xff);
+    sdl.setTextColour(0xff, 0xff, 0xff, 0xff);
 
     sdl.pollEvent();
-
-    sdl.setFont(OpenSans, 24);
     
-    sdl.drawText(0, 0, "Hello World");
-    
-    sdl.setFont(OpenSans, 64);
-    
-    sdl.setTextColour(0x22, 0x22, 0x22, 0xff);
-    sdl.drawText(0, 50, "Hi World, but BIGGER!");
+   const size = sdl.measureText("Hello", OpenSans);
+   sdl.drawText(0, 0, "Hello");
+   sdl.drawText(size.w, 0, "Bye");
 
     sdl.renderPresent();
 
 }
 
-// while (sdl.getEvent().type !== sdl.Events.Quit)
-//     draw();
 const int = setInterval(function() {
     if (sdl.getEvent().type === sdl.Events.Quit)
         clearInterval(int);

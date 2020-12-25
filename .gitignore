@@ -1,0 +1,8 @@
+build
+.vscode
+.idea
+node_modules
+.kdev4
+package-lock.json
+pnpm-lock.yaml
+SDL2.kdev4

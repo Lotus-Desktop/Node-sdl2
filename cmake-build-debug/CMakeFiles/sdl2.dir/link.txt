@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -g  -shared -Wl,-soname,sdl2.node -o sdl2.node CMakeFiles/sdl2.dir/src/main.cpp.o CMakeFiles/sdl2.dir/src/util.cpp.o  -lSDL2 
